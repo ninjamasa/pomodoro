@@ -1,0 +1,108 @@
+
+@mixin medium {
+  @media screen and (max-width: 1400px) {
+      @content;
+  }
+}
+
+
+@mixin tab {
+  @media screen and (max-width: 960px) {
+      @content;
+  }
+}
+@mixin sp {
+  @media screen and (max-width: 760px) {
+      @content;
+  }
+}
+  @mixin sp-up{
+      @media screen and (min-width: 761px) {
+          @content;
+      }
+  }
+
+@mixin small {
+  @media screen and (max-width: 365px) {
+      @content;
+  }
+}
+
+
+.p-timer-screen {
+
+  height: 100vh;
+
+  background: white;
+
+  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#0076a5+0,009ec3+100 */
+  background: #0076a5; /* Old browsers */
+  background: -moz-linear-gradient(45deg,  #0076a5 0%, #009ec3 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(45deg,  #0076a5 0%,#009ec3 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(45deg,  #0076a5 0%,#009ec3 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0076a5', endColorstr='#009ec3',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
+  &.is-working{
+
+  }
+  &.is-resting{
+    >.e-bg{
+      @extend .is-on;
+    }
+
+  }
+
+  >.e-bg{
+    transition: opacity 2s;
+    opacity: 0;
+
+    position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+
+    &.is-on{
+      opacity: 1;
+      /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#528c39+0,b4df5b+100 */
+      background: #528c39; /* Old browsers */
+      background: -moz-linear-gradient(45deg,  #528c39 0%, #b4df5b 100%); /* FF3.6-15 */
+      background: -webkit-linear-gradient(45deg,  #528c39 0%,#b4df5b 100%); /* Chrome10-25,Safari5.1-6 */
+      background: linear-gradient(45deg,  #528c39 0%,#b4df5b 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#528c39', endColorstr='#b4df5b',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+    }
+  }
+
+  >.e-content{
+    position: relative;
+    z-index: 1;
+
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+
+    >.e-date{
+      font-size: 80px;
+
+      @include sp{
+        font-size: 6vw;
+      }
+    }
+    >.e-time{
+      font-size: 140px;
+
+      @include sp{
+        font-size: 20vw;
+      }
+
+      >.e-slot{
+        display: inline-block;
+        width: 3ex;
+      }
+    }
+  }
+}
