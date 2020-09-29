@@ -4,20 +4,25 @@ import './App.scss';
 import catSoundPath from "./cat.mp3";
 import bellSoundPath from "./bell.mp3";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faDesktop, faLeaf, faBell, faBellSlash} from "@fortawesome/free-solid-svg-icons";
+
+
 const STATUSES = [0,1];
 const [WORKING, RESTING] = STATUSES;
 
 function statusToString(status){
   if(status === WORKING){
-    return  "Working Time";
+    return  "work";
   }
   else if(status === RESTING){
-    return  "Rest Time";
+    return  "break";
   }
   else{
     return null;
   }
 }
+
 
 function determinStatus(minutes){
   return minutes % 2  === 0 ? RESTING : WORKING;
@@ -35,6 +40,35 @@ function determinStatus(minutes){
 
 }
 
+function calcProgress(minutes, seconds){
+  minutes += seconds/60;
+
+  if((25 <= minutes && minutes < 30) || (55 <= minutes  && minutes < 60)){
+    //resting
+    let left_5min = 0;
+    if((25 <= minutes && minutes < 30)){
+      left_5min = 30 - minutes;
+    }
+    else{
+      left_5min = 60 - minutes;
+    }
+    return (1-left_5min/5) * 100;
+  }
+  else{
+
+    let left_25min = 0;
+    if((0 <= minutes && minutes < 25)){
+      left_25min = 25 - minutes;
+    }
+    else{
+      left_25min = 55 - minutes;
+    }
+
+    return (1-left_25min/25) * 100;
+  }
+}
+
+
 export function useValueRef(val) {
   const ref = useRef(val);
   useEffect(() => {
@@ -46,9 +80,42 @@ export function useValueRef(val) {
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 
-
 const catSound = new Audio(catSoundPath);
 const bellSound = new Audio(bellSoundPath);
+
+function LeftArc(props){ // progress <- [0, 100]
+  const {width, height, progress} = props;
+  // progress[0, 100] -> startRad[0, PI]
+  const startRad  = progress / 100 * 2 * Math.PI;
+  const endRad = 0;
+  const rx = width/2*0.9;
+  const ry = width/2*0.9;
+
+  const startPointX = width/2 + rx * Math.cos(startRad);
+  const startPointY = height/2 + ry * Math.sin(startRad);
+
+  const endPointX = width/2 + rx * Math.cos(endRad);
+  const endPointY = height/2 + ry * Math.sin(endRad);
+
+  let large_sweep = "1,1";
+
+  if(startRad > Math.PI){
+    large_sweep = "0,1";
+  }
+  else{
+    large_sweep = "1,1";
+  }
+
+
+
+  return (
+    <svg {...props} width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+      <path d={`M${startPointX},${startPointY}  A${rx},${ry} 0 ${large_sweep} ${endPointX},${endPointY}`} stroke="#fff" style={{opacity:.2}}  
+        transform="rotate(-90)" transform-origin="50%" strokeWidth="30" fill="none"/>
+    </svg>
+  );
+}
 
 function App() {
   const [time, setTime] = useState(new Date());
@@ -59,6 +126,9 @@ function App() {
 
   const refStatus = useValueRef(status);
   const refSoundAllowed = useValueRef(soundAllowed);
+
+
+  const progress = calcProgress(time.getMinutes(), time.getSeconds());
 
   const playSound = async(status, vol = volume)=>{
     try{
@@ -73,7 +143,6 @@ function App() {
         console.log(catSound.volume);
       }
 
-      console.log("allow sound")
       setSoundAllowed(true);
     }
     catch(e){
@@ -119,17 +188,40 @@ function App() {
       <div className="e-bg"></div>
 
       <div className="e-content">
+        
+        <LeftArc className="e-arc" width={800} height={800} progress={progress}/>
+
         <div className="e-date">{ time.getFullYear() }/{ time.getMonth()+1 }/{ time.getDate() }({ DAYS[time.getDay()] })</div>
         <div className="e-time">
           <span className="e-slot">{ time.getHours() }:</span>
           <span className="e-slot">{ time.getMinutes() }:</span>
           <span className="e-slot">{ time.getSeconds() }</span>
         </div>
-        <div className="e-slot">{statusToString(status)}</div>
-        <div><button onClick={playSound}>{soundAllowed ? "音声を再生" : "音声を許可"}</button></div>
-        <div>
-          <input type="range" min="0" max="1" step=".1" onChange={e=>setVolume(e.target.value)}/>
+        <div className={"e-status " + (status === WORKING ? "is-work":"is-break")}>
+          <div className="e-icon">
+            {
+              status === WORKING ? 
+                <FontAwesomeIcon size={"lg"} icon={faDesktop} />
+                :
+                <FontAwesomeIcon height="65" icon={faLeaf} />
+            }
+          </div>
+          <div className="e-text">{statusToString(status)}</div>
+          
+        </div>
+      </div>
 
+      <div className="e-settings">
+        <div className="e-icon" onClick={playSound}>
+          {
+            soundAllowed ? 
+              <FontAwesomeIcon icon={faBell} />
+              : 
+              <FontAwesomeIcon icon={faBellSlash} />
+          }
+        </div>
+        <div className="e-range">
+          <input type="range" min="0" max="1" step=".1" onChange={e=>setVolume(e.target.value)}/>
         </div>
       </div>
     </div>

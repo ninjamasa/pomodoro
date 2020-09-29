@@ -37,10 +37,10 @@
 
   /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#0076a5+0,009ec3+100 */
   background: #0076a5; /* Old browsers */
-  background: -moz-linear-gradient(45deg,  #0076a5 0%, #009ec3 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(45deg,  #0076a5 0%,#009ec3 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(45deg,  #0076a5 0%,#009ec3 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0076a5', endColorstr='#009ec3',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+  background: -moz-linear-gradient(45deg,  #0076a5 0%, #53ddf6 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(45deg,  #0076a5 0%,#53ddf6 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(45deg,  #0076a5 0%,#53ddf6 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0076a5', endColorstr='#53ddf6',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 
   &.is-working{
 
@@ -78,22 +78,45 @@
     position: relative;
     z-index: 1;
 
-    height: 100vh;
+    height: 90vh;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     text-align: center;
 
-    >.e-date{
-      font-size: 80px;
+    @include sp{
+      height: 70vh;
+    }
 
+    >.e-arc{
+      position: absolute;
+        top:0;
+        left:0;
+        right:0;
+        bottom:0;
+        z-index: -1;
+
+    }
+  
+
+    >.e-date{
+      margin-top: 100px; //下とバランスをとるため
+
+      font-size: 50px;
+
+      opacity: .8;
+      
       @include sp{
+        margin-top: 13vw; //下とバランスをとるため
+
         font-size: 6vw;
       }
     }
     >.e-time{
       font-size: 140px;
+
+      opacity: .8;
 
       @include sp{
         font-size: 20vw;
@@ -101,8 +124,66 @@
 
       >.e-slot{
         display: inline-block;
-        width: 3ex;
+        width: 2.7ex;
       }
     }
+
+    >.e-status{
+      margin-top: 50px;
+      text-align: center;
+
+      @include sp{
+        margin-top: 5vw;
+      }
+      &.is-work{
+        color: #0049a6;
+      }
+      &.is-break{
+        color: #548e3a;
+      }
+
+      >.e-icon{
+        font-size: 50px;
+
+        @include sp{
+          font-size: 8vw;
+        }
+      }
+      >.e-text{
+        
+        font-size: 30px;
+
+        @include sp{
+          font-size: 5vw;
+        }
+
+      }
+
+
+    }
+  }
+
+  .e-settings{
+    position: relative;
+    z-index: 1;
+    padding: 5px 20px;
+    width: 200px;
+    margin-left: auto;
+    text-align: center;
+
+    @include sp{
+      margin: 0 auto;
+    }
+
+    >.e-icon{
+      font-size: 40px;
+
+      opacity: .8;
+
+    }
+    >.e-range{
+
+    }
+
   }
 }
