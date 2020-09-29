@@ -1,14 +1,17 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useCallback,  useEffect, useRef} from 'react';
 import './App.scss';
+
+import catSoundPath from "./cat.mp3";
+import bellSoundPath from "./bell.mp3";
 
 const STATUSES = [0,1];
 const [WORKING, RESTING] = STATUSES;
 
 function statusToString(status){
-  if(status == WORKING){
+  if(status === WORKING){
     return  "Working Time";
   }
-  else if(status == RESTING){
+  else if(status === RESTING){
     return  "Rest Time";
   }
   else{
@@ -17,7 +20,7 @@ function statusToString(status){
 }
 
 function determinStatus(minutes){
-  return minutes % 2  == 0 ? RESTING : WORKING;
+  return minutes % 2  === 0 ? RESTING : WORKING;
   /*
   if(25 <= minutes  && minutes < 30){
     return RESTING;
@@ -33,8 +36,8 @@ function determinStatus(minutes){
 }
 
 export function useValueRef(val) {
-  const ref = React.useRef(val);
-  React.useEffect(() => {
+  const ref = useRef(val);
+  useEffect(() => {
     ref.current = val;
   }, [val]);
   return ref;
@@ -43,56 +46,72 @@ export function useValueRef(val) {
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 
-const catCrySound = new Audio("./cat-cry1.mp3");
-const bellSound = new Audio("./bell1.mp3");
+
+const catSound = new Audio(catSoundPath);
+const bellSound = new Audio(bellSoundPath);
 
 function App() {
   const [time, setTime] = useState(new Date());
   const [status, setStatus] = useState(WORKING);
+  const [soundAllowed, setSoundAllowed] = useState(false);
+  const [volume, setVolume] = useState(0.5);
+
 
   const refStatus = useValueRef(status);
+  const refSoundAllowed = useValueRef(soundAllowed);
 
-  const playSound = ()=>{
+  const playSound = async(status, vol = volume)=>{
     try{
+      if(status === WORKING){
+        bellSound.volume = vol;
+        await bellSound.play();
+        console.log(bellSound.volume);
+      }
+      else{
+        catSound.volume = vol;
+        await catSound.play();
+        console.log(catSound.volume);
+      }
 
-      catCrySound.play();
+      console.log("allow sound")
+      setSoundAllowed(true);
     }
     catch(e){
-
-      console.log("fuck you");
       console.log(e);
     }
   }
 
-  useEffect(() => { //最初と最後のみ実行してタイマーをセット
-    const timer = setInterval(()=>{
-      const currentStatus = refStatus.current;
-      //時間を取得して、分に応じて状態を変化
-      const newTime = new Date();
-      setTime(newTime);
+  const tick = useCallback(()=>{
+    //いちいちrefで参照するのだるいなあ？
+    const currentStatus = refStatus.current;
+    const currentSoundAllowed = refSoundAllowed.current;
 
-      const minutes = newTime.getMinutes();
-      const newStatus = determinStatus(minutes); //分から、今がWORKINGかRESTINGか判断
+    //時間を取得して、分に応じて状態を変化
+    const newTime = new Date();
+    setTime(newTime);
 
-      setStatus(newStatus);
+    const minutes = newTime.getMinutes();
+    const newStatus = determinStatus(minutes); //分から、今がWORKINGかRESTINGか判断
 
-      if(currentStatus != newStatus){
-        if(newStatus == WORKING){
-          console.log("changed to working");
-          playSound()
-        }
-        else if(newStatus == RESTING){
-          console.log("changed to resting");
-          playSound()
-        }
+    setStatus(newStatus);
+
+
+    if(currentStatus !== newStatus){
+
+      console.log(currentSoundAllowed );
+      if(currentSoundAllowed ){
+        playSound(newStatus, volume)
       }
+    }
+  }, [refStatus,refSoundAllowed, volume]);
+    
 
-    },1000);
+  useEffect(() => { //最初と最後のみ実行してタイマーをセット
+    setTimeout(tick, 1000);
+
     return () => {
-      clearInterval(timer);
     };
-  },[]);
-
+  },[time, tick]);
 
 
   return (
@@ -107,7 +126,11 @@ function App() {
           <span className="e-slot">{ time.getSeconds() }</span>
         </div>
         <div className="e-slot">{statusToString(status)}</div>
-        <div><button onTouchStart={playSound}>音声を許可</button></div>
+        <div><button onClick={playSound}>{soundAllowed ? "音声を再生" : "音声を許可"}</button></div>
+        <div>
+          <input type="range" min="0" max="1" step=".1" onChange={e=>setVolume(e.target.value)}/>
+
+        </div>
       </div>
     </div>
   );
