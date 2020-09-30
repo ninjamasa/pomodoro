@@ -7,6 +7,8 @@ import bellSoundPath from "./bell.mp3";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDesktop, faLeaf, faBell, faBellSlash} from "@fortawesome/free-solid-svg-icons";
 
+import LeftArc from './LeftArc.js';
+import {calcLeftTime, calcProgress} from './leftTime.js';
 
 const STATUSES = [0,1];
 const [WORKING, RESTING] = STATUSES;
@@ -26,7 +28,7 @@ function statusToString(status){
 
 function determinStatus(minutes){
   //return minutes % 2  === 0 ? RESTING : WORKING;
-  //*
+  ///*
   if(25 <= minutes  && minutes < 30){
     return RESTING;
   }
@@ -39,34 +41,6 @@ function determinStatus(minutes){
   //*/
 }
 
-
-function calcProgress(minutes, seconds){
-  minutes += seconds/60;
-
-  if((25 <= minutes && minutes < 30) || (55 <= minutes  && minutes < 60)){
-    //resting
-    let left_5min = 0;
-    if((25 <= minutes && minutes < 30)){
-      left_5min = 30 - minutes;
-    }
-    else{
-      left_5min = 60 - minutes;
-    }
-    return (1-left_5min/5) * 100;
-  }
-  else{
-
-    let left_25min = 0;
-    if((0 <= minutes && minutes < 25)){
-      left_25min = 25 - minutes;
-    }
-    else{
-      left_25min = 55 - minutes;
-    }
-
-    return (1-left_25min/25) * 100;
-  }
-}
 
 
 export function useValueRef(val) {
@@ -83,51 +57,20 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const catSound = new Audio(catSoundPath);
 const bellSound = new Audio(bellSoundPath);
 
-function LeftArc(props){ // progress <- [0, 100]
-  const {width, height, progress} = props;
-  // progress[0, 100] -> startRad[0, PI]
-  const startRad  = progress / 100 * 2 * Math.PI;
-  const endRad = 0;
-  const rx = width/2*0.9;
-  const ry = width/2*0.9;
-
-  const startPointX = width/2 + rx * Math.cos(startRad);
-  const startPointY = height/2 + ry * Math.sin(startRad);
-
-  const endPointX = width/2 + rx * Math.cos(endRad);
-  const endPointY = height/2 + ry * Math.sin(endRad);
-
-  let large_sweep = "1,1";
-
-  if(startRad > Math.PI){
-    large_sweep = "0,1";
-  }
-  else{
-    large_sweep = "1,1";
-  }
-
-
-
-  return (
-    <svg {...props} width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} version="1.1" xmlns="http://www.w3.org/2000/svg">
-
-      <path d={`M${startPointX},${startPointY}  A${rx},${ry} 0 ${large_sweep} ${endPointX},${endPointY}`} stroke="#fff" style={{opacity:.2}}  
-        transform="rotate(-90)" transform-origin="50%" strokeWidth="30" fill="none"/>
-    </svg>
-  );
-}
 
 function App() {
   const [time, setTime] = useState(new Date());
   const [status, setStatus] = useState(WORKING);
   const [soundAllowed, setSoundAllowed] = useState(false);
   const [volume, setVolume] = useState(0.5);
+  const [leftTimeView, setLeftTimeView ] = useState(false);
 
 
   const refStatus = useValueRef(status);
   const refSoundAllowed = useValueRef(soundAllowed);
 
 
+  const leftTime = calcLeftTime(time.getMinutes(), time.getSeconds())
   const progress = calcProgress(time.getMinutes(), time.getSeconds());
 
   const playSound = async(status, vol = volume)=>{
@@ -191,18 +134,29 @@ function App() {
         <LeftArc className="e-arc" width={800} height={800} progress={progress}/>
 
         <div className="e-date">{ time.getFullYear() }/{ time.getMonth()+1 }/{ time.getDate() }({ DAYS[time.getDay()] })</div>
-        <div className="e-time">
-          <span className="e-slot">{ time.getHours() }:</span>
-          <span className="e-slot">{ time.getMinutes() }:</span>
-          <span className="e-slot">{ time.getSeconds() }</span>
+
+        <div className="e-time" onClick={e=>setLeftTimeView(!leftTimeView)}>
+          {
+            !leftTimeView ? 
+            <>
+              <span className="e-slot">{ time.getHours() }:</span>
+              <span className="e-slot">{ time.getMinutes() }:</span>
+              <span className="e-slot">{ time.getSeconds() }</span>
+            </>
+            :
+            <>
+              <span className="e-slot">{ leftTime.minutes }:</span>
+              <span className="e-slot">{ leftTime.seconds }</span>
+            </>
+          }
         </div>
         <div className={"e-status " + (status === WORKING ? "is-work":"is-break")}>
           <div className="e-icon">
             {
               status === WORKING ? 
-                <FontAwesomeIcon size={"lg"} icon={faDesktop} />
+                <FontAwesomeIcon icon={faDesktop} />
                 :
-                <FontAwesomeIcon height="65" icon={faLeaf} />
+                <FontAwesomeIcon icon={faLeaf} />
             }
           </div>
           <div className="e-text">{statusToString(status)}</div>
