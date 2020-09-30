@@ -25,8 +25,8 @@ function statusToString(status){
 
 
 function determinStatus(minutes){
-  return minutes % 2  === 0 ? RESTING : WORKING;
-  /*
+  //return minutes % 2  === 0 ? RESTING : WORKING;
+  //*
   if(25 <= minutes  && minutes < 30){
     return RESTING;
   }
@@ -36,9 +36,9 @@ function determinStatus(minutes){
   else{
     return WORKING;
   }
-  */
-
+  //*/
 }
+
 
 function calcProgress(minutes, seconds){
   minutes += seconds/60;
@@ -166,7 +166,6 @@ function App() {
 
 
     if(currentStatus !== newStatus){
-
       console.log(currentSoundAllowed );
       if(currentSoundAllowed ){
         playSound(newStatus, volume)
