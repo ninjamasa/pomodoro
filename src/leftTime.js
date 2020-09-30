@@ -14,9 +14,9 @@ export function calcLeftTime(minutes, seconds){
     }
 
     return {
-      leftTime:left_5min,
-      minutes: Math.floor(left_5min), 
-      seconds: Math.floor((left_5min - Math.floor(left_5min))*60),
+      leftTime:left_5min-seconds/60,
+      minutes: left_5min + (seconds === 0 ? 1:0), 
+      seconds: seconds === 0 ? 0 : 60 - seconds,
       max:5
     };
   }
