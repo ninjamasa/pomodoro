@@ -15,7 +15,7 @@ export function calcLeftTime(minutes, seconds){
 
     return {
       leftTime:left_5min-seconds/60,
-      minutes: left_5min + (seconds === 0 ? 1:0), 
+      minutes: left_5min + (seconds !== 0 ? -1:0), 
       seconds: seconds === 0 ? 0 : 60 - seconds,
       max:5
     };
@@ -32,7 +32,7 @@ export function calcLeftTime(minutes, seconds){
 
     return {
       leftTime:left_25min-seconds/60,
-      minutes: left_25min + (seconds === 0 ? 1:0), 
+      minutes: left_25min + (seconds !== 0 ? -1:0), 
       seconds: seconds === 0 ? 0 : 60 - seconds,
       max:25
     };
